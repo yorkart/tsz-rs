@@ -175,7 +175,7 @@ where
                     self.done = true;
                 }
                 err
-            })?;;
+            })?;
             self.read_first_value()?
         } else {
             time = self.read_next_timestamp().map_err(|err| {
@@ -183,7 +183,7 @@ where
                     self.done = true;
                 }
                 err
-            })?;;
+            })?;
             self.read_next_value()?
         };
 

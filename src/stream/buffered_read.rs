@@ -10,7 +10,7 @@ use Bit;
 pub struct BufferedReader {
     bytes: Vec<u8>, // internal buffer of bytes
     index: usize,   // index into bytes
-    pos: u32,       // position in the byte we are currenlty reading
+    pos: u32,       // position in the byte we are currently reading
 }
 
 impl BufferedReader {

@@ -32,6 +32,7 @@ pub struct StdEncoder<T: Write> {
     first: bool, // will next DataPoint be the first DataPoint encoded
 
     w: T,
+    size: u64,
 }
 
 impl<T> StdEncoder<T>
@@ -49,12 +50,17 @@ where
             trailing_zeroes: 64, // 64 is an intitial sentinel value
             first: true,
             w,
+            size: 0,
         };
 
         // write timestamp header
         e.w.write_bits(start, 64);
 
         e
+    }
+
+    pub fn get_size(&self) -> u64 {
+        self.size
     }
 
     fn write_first(&mut self, time: u64, value_bits: u64) {
@@ -82,19 +88,19 @@ where
 
         // store the delta of delta using variable length encoding
         #[cfg_attr(feature = "cargo-clippy", allow(match_overlapping_arm))]
-        match dod {
+            match dod {
             0 => {
                 self.w.write_bit(Bit::Zero);
             }
-            -63...64 => {
+            -63..=64 => {
                 self.w.write_bits(0b10, 2);
                 self.w.write_bits(dod as u64, 7);
             }
-            -255...256 => {
+            -255..=256 => {
                 self.w.write_bits(0b110, 3);
                 self.w.write_bits(dod as u64, 9);
             }
-            -2047...2048 => {
+            -2047..=2048 => {
                 self.w.write_bits(0b1110, 4);
                 self.w.write_bits(dod as u64, 12);
             }
@@ -156,8 +162,8 @@ where
 }
 
 impl<T> Encode for StdEncoder<T>
-where
-    T: Write,
+    where
+        T: Write,
 {
     fn encode(&mut self, dp: DataPoint) {
         let value_bits = unsafe { mem::transmute::<f64, u64>(dp.value) };
@@ -169,7 +175,9 @@ where
         }
 
         self.write_next_timestamp(dp.time);
-        self.write_next_value(value_bits)
+        self.write_next_value(value_bits);
+
+        self.size = self.size + 1;
     }
 
     fn close(mut self) -> Box<[u8]> {
@@ -245,5 +253,26 @@ mod tests {
         ];
 
         assert_eq!(bytes[..], expected_bytes[..]);
+    }
+
+    #[test]
+    fn range_test() {
+        let dod = 64;
+        match dod {
+            0 => {
+                println!("0");
+            }
+            -63..=64 => {
+                println!("-64 ~ 64");
+            }
+            _ => {}
+        }
+        for i in 1..3 {
+            println!("i: {}", i);
+        }
+        println!("=======");
+        for i in 1..=3 {
+            println!("i: {}", i);
+        }
     }
 }
