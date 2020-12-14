@@ -19,11 +19,6 @@ impl fmt::Display for Error {
 }
 
 impl error::Error for Error {
-    fn description(&self) -> &str {
-        match *self {
-            Error::EOF => "Encountered the end of the stream",
-        }
-    }
 }
 
 /// Read

@@ -25,14 +25,6 @@ impl fmt::Display for Error {
 }
 
 impl error::Error for Error {
-    fn description(&self) -> &str {
-        match *self {
-            Error::Stream(ref err) => err.description(),
-            Error::InvalidInitialTimestamp => "Failed to parse initial timestamp",
-            Error::InvalidEndOfStream => "Encountered invalid end of steam marker",
-            Error::EndOfStream => "Encountered end of the stream",
-        }
-    }
 }
 
 impl From<stream::Error> for Error {
